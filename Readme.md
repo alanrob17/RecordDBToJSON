@@ -11,3 +11,9 @@ I create two JSON files
 ``records.json`` is the list of records that have been joined to my list of artists from MongoDB. I have added the artist objectId to each record.
 
 I then copy this file to another project named **record-db-to-mongo** that is used to import my data into MongoDB Compass.
+
+### To-Do
+
+I have expanded this program to create versions of my RecordDB that can be used in a number of other databases.
+
+In the process I haven't planned this project properly. I am going to have to refactor this code.
