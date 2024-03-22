@@ -65,7 +65,7 @@ namespace RecordDBToJSON.BLL
         {
             var d = new StringBuilder();
 
-            d.Append($"INSERT INTO [Disc] ([DiscId], [RecordId],[DiscNo],[FreeDbDiscId],[FreeDbId],[Length]) VALUES ({disc.DiscId}, {disc.RecordId}, {disc.DiscNo}, {disc.FreeDbDiscId}, '{disc.FreeDbId}', {disc.Length});");
+            d.Append($"SET IDENTITY_INSERT Disc ON\nINSERT INTO [Disc] ([DiscId], [RecordId],[DiscNo],[FreeDbDiscId],[FreeDbId],[Length]) VALUES ({disc.DiscId}, {disc.RecordId}, {disc.DiscNo}, {disc.FreeDbDiscId}, '{disc.FreeDbId}', {disc.Length});\nSET IDENTITY_INSERT Disc OFF\nGO");
 
             return d.ToString();
         }
@@ -119,7 +119,7 @@ namespace RecordDBToJSON.BLL
             track.Extended = track.Extended.Replace('~', '"');
             track.Extended = track.Extended.Replace("\r\n", string.Empty);
 
-            t.Append($"INSERT INTO [Track] ([TrackId],[DiscId],[TrackNo],[Name],[TrackLength],[Extended]) VALUES ({track.TrackId}, {track.DiscId}, {track.TrackNo}, '{track.Name}', {track.TrackLength}, '{track.Extended}');");
+            t.Append($"SET IDENTITY_INSERT Track ON\nINSERT INTO [Track] ([TrackId],[DiscId],[TrackNo],[Name],[TrackLength],[Extended]) VALUES ({track.TrackId}, {track.DiscId}, {track.TrackNo}, '{track.Name}', {track.TrackLength}, '{track.Extended}');\nSET IDENTITY_INSERT Track OFF\nGO");
 
             return t.ToString();
         }
@@ -176,7 +176,7 @@ namespace RecordDBToJSON.BLL
             item.Review = item.Review.Replace('~', '"');
             item.Review = item.Review.Replace("\r\n", string.Empty);
 
-            f.Append($"INSERT INTO [FreeDB] ([Id],[Artist],[RecordId],[Record],[DiscId],[FreeDbId],[OtherFreeDbId],[Genre],[Revision],[Review]) VALUES ({item.Id}, '{item.Artist}', {item.RecordId}, '{item.Record}', {item.DiscId}, '{item.FreeDbId}','{item.OtherFreeDbId}','{item.Genre}', {item.Revision}, '{item.Review}');");
+            f.Append($"SET IDENTITY_INSERT FreeDB ON\nINSERT INTO [FreeDB] ([Id],[Artist],[RecordId],[Record],[DiscId],[FreeDbId],[OtherFreeDbId],[Genre],[Revision],[Review]) VALUES ({item.Id}, '{item.Artist}', {item.RecordId}, '{item.Record}', {item.DiscId}, '{item.FreeDbId}','{item.OtherFreeDbId}','{item.Genre}', {item.Revision}, '{item.Review}');\nSET IDENTITY_INSERT FreeDB OFF\nGO");
 
             return f.ToString();
         }

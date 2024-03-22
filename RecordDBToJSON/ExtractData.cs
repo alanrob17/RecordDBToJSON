@@ -49,6 +49,9 @@ namespace RecordDBToJSON
             CleanJson("records.json");
 
             WriteArtistText(artists);
+
+            // Note: this method is only used to fix up a problem in the Azure Artist table
+            // UpdateArtistText(artists);
             WriteAzureArtistText(azureArtists);
 
             WriteRecordText(records);
@@ -258,7 +261,7 @@ namespace RecordDBToJSON
             {
                 var record = currentRecord;
 
-                var recordText = FormatFullRecordText(record);
+                var recordText = FormatAzureFullRecordText(record);
 
                 sw.WriteLine(recordText);
             }
@@ -333,6 +336,26 @@ namespace RecordDBToJSON
         }
 
         /// <summary>
+        /// Format Azure full record data for insert command.
+        /// </summary>
+        /// <param name="record">The record.</param>
+        /// <returns>The <see cref="string"/>record in SQL query format.</returns>
+        private static string FormatAzureFullRecordText(FullRecord record)
+        {
+            var r = new StringBuilder();
+
+            record.Name = record.Name.Replace("'", "''");
+            record.Label = record.Label.Replace("'", "''");
+            record.Review = record.Review.Replace("'", "''");
+            record.Review = record.Review.Replace('~', '"');
+            record.Review = record.Review.Replace("\r\n", string.Empty);
+
+            r.Append($"SET IDENTITY_INSERT Record ON\nINSERT INTO [Record] ([RecordId],[ArtistId],[Name],[Field],[Recorded],[Label],[Pressing],[Rating],[Discs],[Media],[Bought],[Cost],[CoverName],[Review],[FreeDbId]) VALUES ({record.RecordId}, {record.ArtistId}, '{record.Name}', '{record.Field}', {record.Recorded}, '{record.Label}', '{record.Pressing}', '{record.Rating}', {record.Discs}, '{record.Media}', '{record.Bought}', {record.Cost}, '{record.CoverName}', '{record.Review}', {record.FreeDbId});\nSET IDENTITY_INSERT Record OFF\nGO");
+
+            return r.ToString();
+        }
+
+        /// <summary>
         /// Write azure Artist text file.
         /// </summary>
         /// <param name="artists">The Artists list for azure.</param>
@@ -346,7 +369,7 @@ namespace RecordDBToJSON
             {
                 var artist = currentArtist;
 
-                var artistText = FormatArtistText(artist);
+                var artistText = FormatAzureArtistText(artist);
 
                 sw.WriteLine(artistText);
             }
@@ -398,6 +421,28 @@ namespace RecordDBToJSON
             artist.Biography = artist.Biography.Replace("\r\n", string.Empty);
 
             a.Append($"INSERT INTO Artist (ArtistId, FirstName, LastName, Name, Biography) VALUES ({artist.ArtistId}, '{artist.FirstName}', '{artist.LastName}', '{artist.Name}', '{artist.Biography}');");
+
+            return a.ToString();
+        }
+
+        /// <summary>
+        /// Format Azure artist data for insert command.
+        /// </summary>
+        /// <param name="artist">The artist.</param>
+        /// <returns>The <see cref="string"/>artist in SQL query format.</returns>
+        private static string FormatAzureArtistText(Artist artist)
+        {
+            var a = new StringBuilder();
+
+            artist.FirstName = artist.FirstName.Replace("'", "''");
+
+            artist.LastName = artist.LastName.Replace("'", "''");
+            artist.Name = artist.Name.Replace("'", "''");
+            // artist.Biography = artist.Biography.Replace("'", "''");
+            artist.Biography = artist.Biography.Replace('~', '"');
+            artist.Biography = artist.Biography.Replace("\r\n", string.Empty);
+
+            a.Append($"SET IDENTITY_INSERT Artist ON\nINSERT INTO Artist (ArtistId, FirstName, LastName, Name, Biography) VALUES ({artist.ArtistId}, '{artist.FirstName}', '{artist.LastName}', '{artist.Name}', '{artist.Biography}');\nSET IDENTITY_INSERT Artist OFF\nGO");
 
             return a.ToString();
         }
@@ -654,6 +699,51 @@ namespace RecordDBToJSON
             var records = recordData.Select();
 
             return records;
+        }
+
+        /// <summary>
+        /// // Note: this method is only used to fix up a problem in the Azure Artist table
+        /// </summary>
+        /// <param name="artists">The Artists.</param>
+        private static void UpdateArtistText(List<Artist> artists)
+        {
+            var outFile = Environment.CurrentDirectory + "\\updateartists.txt";
+            var outStream = File.Create(outFile);
+            var sw = new StreamWriter(outStream);
+
+            foreach (var currentArtist in artists)
+            {
+                var artist = currentArtist;
+
+                var artistText = FormatUpdateArtistText(artist);
+
+                sw.WriteLine(artistText);
+            }
+
+            // flush and close
+            sw.Flush();
+            sw.Close();
+        }
+
+        // Note: this method is only used to fix up a problem in the Azure Artist table
+        private static string FormatUpdateArtistText(Artist artist)
+        {
+            var a = new StringBuilder();
+
+            // artist.Biography = artist.Biography.Replace("'", "''");
+            artist.Biography = artist.Biography.Replace('~', '"');
+            artist.Biography = artist.Biography.Replace("\r\n", string.Empty);
+
+            if (artist.Biography.Length > 0 )
+            {
+                a.Append($"UPDATE Artist SET Biography = '{artist.Biography}' WHERE ArtistId = {artist.ArtistId};\nGO");
+            }
+            else
+            {
+                a.Append($"UPDATE Artist SET Biography = NULL WHERE ArtistId = {artist.ArtistId};\nGO");
+            }
+
+            return a.ToString();
         }
     }
 }
