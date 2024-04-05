@@ -37,6 +37,9 @@ namespace RecordDBToJSON
             var items = azure.SelectFreeDBItems();
             azure.WriteFreeDBText(items);
 
+            var postgres = new Postgres();
+            postgres.WritePostgresText(artists, records);
+
             // Artist-Record list for Netlify
             WriteArtistRecordJson(artists, records);
             CleanJson("artists-records.json");

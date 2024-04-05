@@ -47,6 +47,7 @@
     <Compile Include="Artist.cs" />
     <Compile Include="ArtistData.cs" />
     <Compile Include="BLL\Azure.cs" />
+    <Compile Include="BLL\Postgres.cs" />
     <Compile Include="Components\AppSettings.cs" />
     <Compile Include="Components\DataConvert.cs" />
     <Compile Include="Data\DiscData.cs" />
